@@ -5,7 +5,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import BookList from './components/BookList';
 import BookForm from './components/BookForm';
 import Navbar from './components/Navbar';
-import EditBook from './components/EditBook';
+
 
 function App() {
   return (
@@ -16,7 +16,7 @@ function App() {
           <Routes>
             <Route path="/" element={<BookList />} />
             <Route path="/add" element={<BookForm />} />
-            <Route path="/edit/:id" element={<EditBook />} /> {/* <-- Asegúrate de que esto esté así */}
+            <Route path="/edit-book/:id" element={<BookForm />} />
           </Routes>
         </div>
       </div>
