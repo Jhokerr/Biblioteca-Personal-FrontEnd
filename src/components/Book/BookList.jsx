@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import axiosInstance from "../../config/axios"; // ← AGREGAR ESTO
 import { Link } from "react-router-dom";
 import { PencilSquareIcon, TrashIcon, XMarkIcon } from "@heroicons/react/24/solid";
+import BookModal from './BookModal';
+import DeleteConfirmationModal from './DeleteConfirmationModal';
 
 const placeholderCover = "https://via.placeholder.com/150x200.png?text=Sin+Portada";
 
@@ -14,6 +16,8 @@ const BookList = () => {
   const [selectedBook, setSelectedBook] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [pagination, setPagination] = useState({});
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [bookToDeleteId, setBookToDeleteId] = useState(null);
 
   // Cargar libros
   useEffect(() => {
@@ -51,18 +55,9 @@ const BookList = () => {
       (book.genre && book.genre.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
-  const handleDelete = (id) => {
-    if (window.confirm("¿Estás seguro de que quieres eliminar este libro?")) {
-      axiosInstance
-        .delete(`/books/${id}`)
-        .then(() => {
-          setBooks(books.filter((book) => book.id !== id));
-        })
-        .catch((error) => {
-          console.error("Error deleting book:", error);
-          alert("No se pudo eliminar el libro.");
-        });
-    }
+ const handleDelete = (id) => {
+    setBookToDeleteId(id); // Guarda el ID del libro a eliminar
+    setShowDeleteModal(true); // Muestra el modal
   };
 
   const openModal = (book) => {
@@ -73,6 +68,37 @@ const BookList = () => {
   const closeModal = () => {
     setIsModalOpen(false);
     setSelectedBook(null);
+  };
+
+  const confirmDelete = () => {
+    // 1. Oculta el modal inmediatamente
+    setShowDeleteModal(false); 
+    
+    // Verifica que tengamos un ID para eliminar
+    if (!bookToDeleteId) return;
+
+    // 2. Ejecuta la lógica de eliminación con Axios
+    axiosInstance
+      .delete(`/books/${bookToDeleteId}`)
+      .then(() => {
+        // 3. Actualiza el estado de los libros
+        setBooks(books.filter((book) => book.id !== bookToDeleteId));
+        // Opcional: Mostrar una notificación de éxito (ej. Toast)
+        console.log("Libro eliminado con éxito."); 
+      })
+      .catch((error) => {
+        console.error("Error deleting book:", error);
+        alert("No se pudo eliminar el libro."); // Podrías reemplazar este alert también
+      })
+      .finally(() => {
+        // 4. Limpia el ID guardado
+        setBookToDeleteId(null);
+      });
+  };
+
+  const cancelDelete = () => {
+    setShowDeleteModal(false);
+    setBookToDeleteId(null);
   };
 
   return (
@@ -136,7 +162,7 @@ const BookList = () => {
             {/* Acciones */}
             <div className="flex flex-col gap-2 ml-4">
               <Link 
-                to={`/edit-book/${book.id}`} 
+                to={`/books/${book.id}/edit`} 
                 onClick={(e) => e.stopPropagation()} 
                 className="p-2 bg-indigo-100 text-indigo-600 rounded-full hover:bg-indigo-200 transition"
               >
@@ -182,84 +208,31 @@ const BookList = () => {
         </div>
       )}
       
-      {/* Modal */}
-      {isModalOpen && selectedBook && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-6 z-50">
-          <div className="relative bg-gradient-to-br from-indigo-900 via-blue-900 to-indigo-800 text-white rounded-2xl shadow-2xl w-full max-w-4xl flex overflow-hidden">
-            
-            {/* Botón cerrar */}
-            <button 
-              onClick={closeModal} 
-              className="absolute top-4 right-4 text-gray-300 hover:text-white transition-colors"
-            >
-              <XMarkIcon className="h-7 w-7" />
-            </button>
-
-            {/* Portada */}
-            <div className="w-1/3 bg-black/20 p-6 flex justify-center items-center">
-              <img 
-                src={selectedBook.cover_url || placeholderCover} 
-                alt={selectedBook.title} 
-                className="rounded-lg shadow-lg max-h-80 object-cover border-4 border-white/20"
-              />
-            </div>
-
-            {/* Info del libro */}
-            <div className="w-2/3 p-8 flex flex-col justify-between">
-              
-              {/* Autor + título */}
-              <div>
-                <h3 className="text-indigo-300 text-sm font-semibold">Autor: {selectedBook.author}</h3>
-                <h2 className="text-3xl font-extrabold mb-2">{selectedBook.title}</h2>
-                <p className="text-gray-300 text-sm">
-                  {selectedBook.published_year && `${selectedBook.published_year} • `}
-                  {selectedBook.pages && `${selectedBook.pages} páginas`}
-                </p>
-
-                {/* Tags */}
-                <div className="mt-3 flex flex-wrap gap-2">
-                  {selectedBook.genre && (
-                    <span className="bg-indigo-700/50 px-3 py-1 text-xs rounded-full border border-indigo-500">
-                      {selectedBook.genre}
-                    </span>
-                  )}
-                  {selectedBook.reading_status && (
-                    <span className="bg-blue-700/50 px-3 py-1 text-xs rounded-full border border-blue-500">
-                      {selectedBook.reading_status}
-                    </span>
-                  )}
-                </div>
-              </div>
-              
-              {/* Descripción */}
-              {selectedBook.description && (
-                <p className="mt-6 text-gray-200 text-sm leading-relaxed">
-                  {selectedBook.description}
-                </p>
-              )}
-
-              {/* Botones de acción */}
-              <div className="mt-6 flex gap-4">
-                <Link 
-                  to={`/edit-book/${selectedBook.id}`}
-                  onClick={(e) => e.stopPropagation()}
-                  className="flex items-center justify-center px-5 py-2 bg-blue-500 hover:bg-blue-400 rounded-full font-semibold text-white shadow transition"
-                >
-                  ✏️ Editar
-                </Link>
-                <button 
-                  onClick={(e) => { e.stopPropagation(); handleDelete(selectedBook.id); }} 
-                  className="flex items-center justify-center px-5 py-2 bg-red-500 hover:bg-red-400 rounded-full font-semibold text-white shadow transition"
-                >
-                  🗑 Eliminar
-                </button>
-              </div>
-
-            </div>
-          </div>
-        </div>
+      {isModalOpen && (
+        <BookModal 
+          isOpen={isModalOpen}
+          book={selectedBook}
+          onClose={closeModal}
+          onEdit={(id) => {
+            navigate(`/edit-book/${id}`);
+            closeModal();
+          }}
+          onDelete={(id) => {
+            handleDelete(id);
+            closeModal();
+          }}
+        />
       )}
+
+      {/* Modal de Confirmación de Eliminación */}
+      <DeleteConfirmationModal 
+        show={showDeleteModal} 
+        onConfirm={confirmDelete} 
+        onCancel={cancelDelete}
+      />
     </div>
+    
+
   );
 };
 

@@ -1,14 +1,10 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, Link } from 'react-router-dom';
-import { AuthProvider, useAuth } from '../src/components/Auth/AuthContext';
-import Login from '../src/components/Auth/Login';
-import Register from '../src/components/Auth/Register';
-import ProtectedRoute from '../src/components/Auth/ProtectedRoute';
-import BookList from './components/Book/BookList';
-import BookForm from './components/Book/BookForm';
-import Home from './components/Home';
-
 // Componente Navbar
+
+import React from 'react';
+import { useAuth } from '../components/Auth/AuthContext';
+
+
+
 const Navbar = () => {
   const { user, logout } = useAuth();
   
@@ -50,64 +46,4 @@ const Navbar = () => {
   );
 };
 
-// Layout wrapper
-const Layout = ({ children }) => {
-  return (
-    <div className="min-h-screen bg-image bg-cover bg-center bg-fixed">
-      <Navbar />
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {children}
-      </main>
-    </div>
-  );
-};
-
-
-function App() {
-  return (
-    <Router>
-      <AuthProvider>
-        <Routes>
-          {/* Rutas públicas */}
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-
-          {/* Rutas protegidas */}
-          <Route 
-            path="/" 
-            element={
-              <ProtectedRoute>
-                <Home />
-              </ProtectedRoute>
-            } 
-          />
-          <Route 
-            path="/books/create" 
-            element={
-              <ProtectedRoute>
-                <Layout>
-                  <BookForm />
-                </Layout>
-              </ProtectedRoute>
-            } 
-          />
-         
-          <Route 
-            path="/books/:id/edit" 
-            element={
-              <ProtectedRoute>
-                <Layout><BookForm /></Layout>
-              </ProtectedRoute>
-            } 
-          />
-          
-          
-          {/* Redirigir cualquier ruta no encontrada al home */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </AuthProvider>
-    </Router>
-  );
-}
-
-export default App;
+export default Navbar;
