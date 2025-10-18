@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Usa la URL directa a Laravel (sin proxy por ahora)
-const API_URL = 'http://127.0.0.1:8000/api';
+const API_URL = 'https://biblioteca-personal-backend.railway.app/api';
 
 const axiosInstance = axios.create({
   baseURL: API_URL,

@@ -57,20 +57,20 @@ const Home = () => {
   
     return (
     <Layout>
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Bienvenido a tu Biblioteca Personal
-          </h1>
-          <p className="text-gray-600">
-            Gestiona y organiza tu colección de libros de manera sencilla
-          </p>
-        </div>
+        <div className="space-y-6">
+            {/* Header */}
+            <div className="bg-white rounded-lg shadow-md p-6">
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                Bienvenido a tu Biblioteca Personal
+            </h1>
+            <p className="text-gray-600">
+                Gestiona y organiza tu colección de libros de manera sencilla
+            </p>
+            </div>
         </div>
 
         
-         {/* Estadísticas */}
+      {/* Estadísticas */}
       <div className="max-w-7xl mx-auto px-6 py-8">
         {loading ? (
           <div className="text-center text-gray-600">Cargando estadísticas...</div>
